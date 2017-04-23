@@ -1,0 +1,33 @@
+{{extend 'layout.html'}}
+<div class="row">
+  <h4>
+    <span class="glyphicon glyphicon glyphicon-tags" aria-hidden="true"></span>
+    &nbsp; Assign Tags
+  </h4>
+<hr/>
+</div>
+<div class="row">
+{{=form}}
+</div>
+
+<div class = "ui-widget">
+         <p>Type "a" or "s"</p>
+         <label for = "automplete-1">Tags: </label>
+         <input id = "automplete-1">
+      </div>
+
+<!-- Javascript -->
+<script>
+ $(function() {
+    var availableTutorials  =  [
+       "ActionScript",
+       "Boostrap",
+       "C",
+       "C++",
+    ];
+    $( "#automplete-1" ).autocomplete({
+       source: availableTutorials
+    });
+ });
+</script>
+{{end}}

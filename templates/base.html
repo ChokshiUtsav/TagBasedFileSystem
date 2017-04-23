@@ -1,0 +1,85 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Tag Based File System</title>
+                <link rel="shortcut icon" type="image/png" href="{% static 'image/favicon.ico' %}"/>
+                <!-- Core CSS - Include with every page -->
+                <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+		   <!-- Core Scripts - Include with every page -->
+                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+                    <script src = "{% static 'js/bootstrap.min.js' %}"></script>
+                    <script src="{% static 'js/js-cookie.js' %}"></script>
+                    <script src="{% static 'js/ajax_setup.js' %}"></script>
+       
+                </head>
+                <body>
+                    <nav class="navbar navbar-default">
+                        <div class="container-fluid">
+                            <div class="navbar-header">
+                                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                                    <span class="sr-only">Toggle navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
+                                <a class="navbar-brand" href="/">TAG BASED FILE SYSTEM</a>
+
+                            </div>
+			<div>
+				
+			</div>
+                            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                                <ul class="nav navbar-nav navbar-right">
+					
+				  <li><a class="active" href="/"> Home </a></li>
+				  <li><a href="/tag/assignTags"> Assign Tags </a></li>
+				  <li><a href="/tag/browseAndSearch"> Browse | Search </a></li>
+				  <li><a href="user/settings">Settings</a></li>
+
+				  <li><a href="#about">About</a></li>
+				
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Account
+                                            <span class="caret"></span>
+                                        </a>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li>
+                                                <a href="/home">home</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">Another action</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">Something else here</a>
+                                            </li>
+                                            <li class="divider"></li>
+                                            <li>
+                                                <a href="#">Separated link</a>
+                                            </li>
+                                            <li class="divider"></li>
+                                            <li>
+                                                <a href="/logout">Logout</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div class="content container">
+                            <div class="row">
+                                <div class="col-md-15">
+                                    {% block content %}
+                                    {% endblock %}
+                                </div>
+                            </div>           
+{% block javascript %}
+        {% endblock %}
+</body>
+</html>
+
