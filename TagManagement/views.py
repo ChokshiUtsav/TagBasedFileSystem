@@ -15,27 +15,41 @@ import urllib
 import pickle
 import random
 import utility
+import eyed3
 from tag_dao import *
 import suggest_tags
 
 def findMostPopularTags():
     most_popular_tag_rows = tag_info.objects.all()
     most_popular_tag_list = [ row.tag_name for row in most_popular_tag_rows ]
-    return most_popular_tag_list
+    return most_popular_tag_list[:6]
 
 def index(request):
     return render(request,'index.html', {})
 
-def findSuggestedTags(filename):
-    #filename = request.session['user_dir']
-    # assigned_tags_list = ["game"]
+def findSuggestedTags(request):
+    filename = request.session['complete_file_path']
+    ftype = utility.findFileType(filename)
+    assigned_tag_list = request.session['assigned_tag_list'].keys()
+
     tags = []
-    if utility.isTextfile(filename):
-         entities = suggest_tags.findNamedEntities(filename)
-         # extract 5 most frequent named entities from file
-         #tags = [pair[0] for pair in sorted(entities.items(), key=lambda entities: entities[1], reverse = True)][:5]
-    tags.append(utility.findFileType(filename))
-    return tags
+    tags.append(ftype)
+    tags.extend(suggest_tags.find_linked_tags(assigned_tag_list))
+    #print tags
+    print ftype
+    if ftype == "text":
+        entities = suggest_tags.findNamedEntities(filename)
+    elif ftype == "audio":
+        entities = suggest_tags.findMetadataforMusic(filename)
+    # elif ftype == "video":
+
+    tags.extend(entities)
+
+    print tags
+    request.session['suggested_tag_list'] = tags
+    eval_str ='$("#suggested_tags").html(\''+renderTagsAsButtons(tags)+'\');'
+    return eval_str
+
 
 def findAutoCompleteTags(partial_tag_input):
     auto_complete_tags_list = []
@@ -73,7 +87,6 @@ def findAutoCompleteFiles(partial_file_name_input):
     return auto_complete_files_list[:6]
 
 def autoCompleteFilePath(request):
-
     file_list = findAutoCompleteFiles(request.session['user_dir'] + request.POST['file_path'])
     return renderAutoCompleteBox(file_list)
 
@@ -96,35 +109,38 @@ def renderTagsAsButtons(tag_list):
     if len(tag_list) != 0:
         for tag in tag_list:
             if tag :
-                rendered_output = rendered_output + '<button class="btn btn-primary" type="button" style="margin-bottom:10px">'+ tag+' </button>'             
+                rendered_output = rendered_output + '<button class="btn btn-primary" type="button" style="margin-bottom:10px;margin-right:3px;"> '+ tag +' </button>'             
     return rendered_output
     
+def updateView(request):
+    eval_str = "$('#assigned_tags').html(\'"+renderTagsAsLabels(request.session['assigned_tag_list'].keys())+"\');"
+    eval_str += findSuggestedTags(request)
+    # print eval_str
+    return eval_str
+
 
 def maintainAssignedTags(request):
     key=str(request.POST['tag']).lower().strip()
-    
     if 'assigned_tag_list' not in request.session:
         request.session['assigned_tag_list']={}
-
     request.session['assigned_tag_list'][key]=1
-
-    return HttpResponse(renderTagsAsLabels(request.session['assigned_tag_list'].keys()))
+    findSuggestedTags(request)
+    request.session.modified = True
+    
+    return HttpResponse(updateView(request))
 
 def addAllToAssignedTags(request):
-
     key = str(request.POST['type']).lower()
-
     if key == 'popular':
         for tag in request.session['most_popular_tag_list']:
             request.session['assigned_tag_list'][tag] = 1
     elif key == 'suggest':
         for tag in request.session['suggested_tag_list']:
             request.session['assigned_tag_list'][tag] = 1
-    return HttpResponse(renderTagsAsLabels(request.session['assigned_tag_list'].keys()))
+    return HttpResponse(updateView(request))
 
 
 def removeAssignedTags(request):
-
     key=str(request.POST['tag']).lower()
 
     if not 'assigned_tag_list' in request.session.keys():
@@ -132,9 +148,9 @@ def removeAssignedTags(request):
     else:
         if key in request.session['assigned_tag_list'].keys():
            del request.session['assigned_tag_list'][key]
+           request.session.modified = True
 
-    return HttpResponse(renderTagsAsLabels(request.session['assigned_tag_list'].keys()))
-
+    return HttpResponse(updateView(request))
 
 def clearTagLists(request):
     request.session['assigned_tag_list']={}
@@ -164,14 +180,7 @@ def storeFilePath(request):
         request.session['assigned_tag_list'] = assigned_tag_dict
         if len(assigned_tag_dict.keys()) > 0:
             request.session['extracted_assigned_tag_list'] = request.session['assigned_tag_list']
-            eval_str += '$("#assigned_tags").html(\''+renderTagsAsLabels(request.session['assigned_tag_list'].keys())+'\');'
-
-        #prepare suggested tag list
-        #suggested_tag_list = findSuggestedTags(complete_file_path)
-        suggested_tag_list = ["new"]
-        request.session['suggested_tag_list'] = suggested_tag_list
-        eval_str +='$("#suggested_tags").html(\''+renderTagsAsButtons(suggested_tag_list)+'\');'
-
+        eval_str += updateView(request)
     else:
         eval_str += '$("#file_path_error").prop("hidden",false)';
 
@@ -181,7 +190,7 @@ def storeFilePath(request):
 def assignTags(request):
     #messages.add_message(request, messages.INFO, 'All items on this page have free shipping.')
     clearTagLists(request)
-    user_dir = "/home/utsav/"
+    user_dir = "/home/deeksha/"
     request.session['user_dir'] = user_dir    
     most_popular_tag_list  = findMostPopularTags()
     request.session['most_popular_tag_list'] = most_popular_tag_list
@@ -224,15 +233,13 @@ def assignTagsToFile(request):
         if tag_row:
             tag_row = tag_row[0]
             tag_row.frequency = tag_row.frequency + 1
-            print "here1"
         else:
             tag_row = tag_info(tag_name=tag,frequency=1)
-            print "here2"
         tag_row.save()
         tag_id = tag_row.id
         f = file_tag(file_id=file_row,tag_id=tag_row)
         f.save() 
 
-    messages.add_message(request, messages.INFO, 'Tags are assigne to file : ' + request.session['complete_file_path'])
+    messages.add_message(request, messages.INFO, 'Tags are assigned to file : ' + request.session['complete_file_path'])
 
     return HttpResponse("Assigned Tags")
