@@ -16,9 +16,11 @@ import os
 import urllib
 import pickle
 import random
+import eyed3
+import utility
 
 
-def create_input_for_apriori(request):
+def create_input_for_apriori():
     f = open("./resources/input1.csv","w+")
     flist = file_info.objects.values('id')  # get all files in system
     for myfile in flist:
@@ -28,19 +30,19 @@ def create_input_for_apriori(request):
         f.write(str(mytags)+"\n")
     f.close()
     os.system("python ./resources/Apriori.py")
-    return HttpResponse("hello")
+    return "hello"
 
 def find_linked_tags(assigned_tags):
     mytags = assigned_tags
     assigned_tags = tuple(sorted(assigned_tags))
-    myfile = open("./applications/TagBasedFileSystem/resources/rules.txt","rb")
+    myfile = open("./resources/rules.txt","rb")
     association_rules = pickle.load(myfile)
-    #print association_rules[0]
+    # print "rule1:",association_rules
     try :
         suggested_tags = list(association_rules[assigned_tags])
     except :
         suggested_tags = []
-    print suggested_tags
+    print "suggested_tags", suggested_tags
     return suggested_tags
 
 def create_graph_for_d3js(mytags):
@@ -74,25 +76,39 @@ def findNamedEntities(filename):
                 full_text_NNPS[save[:-1]] += 1
                 save = ""
 
-    return full_text_NNPS
+    return utility.getTopNDictItems(full_text_NNPS,5)
 
-def findFileType(filename):
-    return "hello"
-    print str(db().select(db.tag_info.ALL, orderby=db.tag_info.tag_name, limitby=(0,6)).as_list())
-    ftype = mimetypes.guess_type(filename,strict=True)[0]
-    if ftype:
-        p = ftype.split("/")
-        #session.flash = p
-        if p[0] == "text":
-            return p[1]
-        else:
-            return p[0]
-    else: # if file type is null, return text tag for file
-        return "text"
-    
-def isTextfile(filename):
-    # if filetype text or None, return True
-    if mimetypes.guess_type(filename,strict=True)[0] == 'text/plain' or not mimetypes.guess_type(filename,strict=True)[0]:
-        return True
-    else:
-        return False
+def findMetadataforMusic(filename): 
+    tags = []  
+    # 'album', 'album_artist', 'album_type', 'artist', 'artist_origin', 'artist_url', 'audio_file_url', 
+    #'audio_source_url', 'best_release_date', 'bpm', 'cd_id', 'chapters', 'clear', 'comments', 'commercial_url',
+    # 'copyright_url', 'disc_num', 'encoding_date', 'extended_header', 'file_info', 'frame_set', 'frameiter', 
+    #'genre', 'getBestDate', 'getTextFrame', 'header', 'images', 'internet_radio_url', 'isV1', 'isV2', 'lyrics',
+    # 'objects', 'play_count', 'publisher', 'recording_date', 'release_date', 'save',
+    # 'title', 'track_num', 'unique_file_ids',  'version'
+    audiofile = eyed3.load(filename)
+    if audiofile.tag.artist:
+        artistlist = audiofile.tag.artist.replace(' ','-').split(',')
+        tags.extend([artist for artist in artistlist])
+
+    if audiofile.tag.album:
+        album = audiofile.tag.album.replace(' ','-')
+        tags.append(album)
+
+    if audiofile.tag.album_artist:
+        album_artist = audiofile.tag.album_artist.replace(' ','-')
+        tags.append(album_artist)
+
+    if audiofile.tag.recording_date and audiofile.tag.recording_date.year:
+        tags.append(str(audiofile.tag.recording_date.year))
+
+    if audiofile.tag.genre.name:
+        genre = audiofile.tag.genre.name.replace(' ','-')
+        tags.append(genre)
+    return list(set(tags))
+
+
+
+
+
+   
