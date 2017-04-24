@@ -18,12 +18,6 @@ def getTagListForFile(request, complete_file_path):
 
 	return tag_dict
 
-'''
-f = file_info(inode_number=inode_number,file_name=file_name)
-f.save()
-'''
-
-
 def getTagnameFromTagid(tag_id):
 	return tag_info.objects.filter(id=tag_id)[0].tag_name
 
