@@ -245,7 +245,7 @@ for rule in qual_rules:
 	else :
 		d[key]=set(list(rule[1]))
 print d
-myfile = open("./resources/rules.txt","wb")
+myfile = open("./resources/rules.pkl","wb")
 pickle.dump(d,myfile)
 
 if(len(qual_rules)>0):
