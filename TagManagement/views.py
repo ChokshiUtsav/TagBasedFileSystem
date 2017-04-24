@@ -57,7 +57,6 @@ def renderAutoCompleteBox(auto_complete_list):
     return HttpResponse(rendered_output)
 
 def autoCompleteTags(request):
-    print request.POST
     auto_complete_tags_list = findAutoCompleteTags(request.POST['tag_search'])
 
     return renderAutoCompleteBox(auto_complete_tags_list)
