@@ -219,7 +219,7 @@ $('#tag_search_submit').click(function(){
          data: dct,
          async: 'true',
          success: function(data) {
-          $('#assigned_tags').html(data);
+          eval(data);
              //alert(data);
          },
          error:function(data) {
@@ -255,7 +255,7 @@ $('#file_path_submit').click(function(){
          async: 'true',
          success: function(data) {
             eval(data);
-            console.log(data);
+            //console.log(data);
          },
          error:function(data) {
             console.log("Error:"+data.responsetext);
@@ -272,7 +272,8 @@ $('#popular_assign_all').click(function(){
          data: dct,
          async: 'true',
          success: function(data) {
-            $('#assigned_tags').html(data);
+            eval(data);
+            
             console.log(data);
          },
          error:function(data) {
@@ -290,7 +291,7 @@ $('#suggest_assign_all').click(function(){
          data: dct,
          async: 'true',
          success: function(data) {
-            $('#assigned_tags').html(data);
+            eval(data);
             console.log(data);
          },
          error:function(data) {
@@ -307,7 +308,7 @@ $('#assigned_tags').on('click','.btn',function(){
          type: "POST",
          data: dct,
          success: function(data) {
-            $('#assigned_tags').html(data);
+           eval(data);
             console.log(data);
          },
          error:function(data) {
@@ -344,7 +345,7 @@ $('#most_popular_tags').on('click','.btn',function(){
        data: dct,
        async: 'true',
        success: function(data) {
-          $('#assigned_tags').html(data);
+          eval(data);
        },
        error:function(data) {
           console.log("Error:"+data.responsetext);
@@ -362,7 +363,8 @@ $('#suggested_tags').on('click','.btn',function(){
        data: dct,
        async: 'true',
        success: function(data) {
-          $('#assigned_tags').html(data);
+          eval(data);
+
        },
        error:function(data) {
           console.log("Error:"+data.responsetext);
@@ -370,6 +372,24 @@ $('#suggested_tags').on('click','.btn',function(){
     });
 });
 
+
+function updateSuggestedTags()
+{
+  dct = {};
+    $.ajax({
+       url: "/tag/suggest/",
+       type: "POST",
+       data: dct,
+       async: 'true',
+       success: function(data) {
+         eval(data);
+       },
+       error:function(data) {
+          console.log("Error:"+data.responsetext);
+       },
+    });
+
+}
 
 </script>
 {% endblock %}
