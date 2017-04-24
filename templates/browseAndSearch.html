@@ -1,0 +1,183 @@
+{% extends 'base.html' %} 
+{% load static %}
+{% block content %} 
+<meta charset="utf-8">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="{% static 'js/ForceDirectedGraph.js' %}"></script>
+<style>
+
+.link {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.node {
+  cursor: move;
+  fill: #ccc;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.node text {
+  stroke:#333;
+  cursor:pointer;
+}
+
+.node.fixed {
+  fill: #f00;
+}
+</style>
+
+<div class="col-md-6" id="io_div">
+	<div class="panel panel-info">
+    	<div class="panel-body">
+      		<div id="tag_div"> 
+		          <label for="tag_search"><h3>Search Tags : </h3></label>
+		          <div class="input-group">
+		          <input type="text" class="form-control" name="tag_search" id="tag_search" placeholder="Enter Tags Here ...">
+		            <span class="input-group-btn">
+		              <button class="btn btn-primary" type="button" id="tag_search_submit">Search</button>
+		            </span>
+		          </div>
+		          <br/>
+
+		          <div class="list-group" id="tag_suggestions">
+		          </div>
+      		</div>
+      	</div>
+    </div>
+    <div class="panel panel-info">
+    	<div class="panel-body"> 
+      		<div id="file_div">
+      			<label><h3>Filtered Files : </h3></label>
+      			<ul id="myList" class="list-group"></ul>
+		        <ul class="pager">
+        			<li class="previous"><a href="" onclick="prevPage(); return false;">«</a></li>
+          			<li class="next"><a href="" onclick="nextPage(); return false;">»</a></li>
+        		</ul>
+      		</div>
+		</div>
+	</div>
+</div>
+<div class="col-md-6" id="filter_div">
+	<div class="panel panel-info">
+    	<div class="panel-body"> 
+	 		<label><h3>Selected Tags : </h3></label>
+	 		<div id="graph_div">
+	 		</div>
+	 	</div>
+	</div>
+</div>
+
+<script>
+
+function autocompleteTags(){  
+  var dct = {}; 
+  dct['tag_search'] = $('#tag_search').val();
+  $.ajax({
+         url: "/tag/autoCompleteTags/",
+         type: "POST",
+         data: dct,
+         async: 'true',
+         success: function(data) {
+         	$('#tag_suggestions').html(data);
+         },
+         error:function(data) {
+            console.log("Error:"+data.responsetext);
+         },
+  });
+};
+
+//Handling auto-complete for tags
+$("#tag_search").keyup(autocompleteTags);
+
+//Assigning selected text to text-box
+$("#tag_suggestions").on('click','.list-group-item', function(){
+      selected_tag_val = $(this).text();
+      $("#tag_search").val(selected_tag_val);
+});
+
+$("#tag_search_submit").click(function(){
+	dct = {};
+  	dct['tag'] = $('#tag_search').val();
+	$.ajax({
+         url: "/search/getGraphData/",
+         type: "POST",
+         data: dct,
+         async: 'true',
+         success: function(data) {
+          	createGraph("#graph_div", jQuery.parseJSON(data));
+         },
+         error:function(data) {
+            console.log("Error:"+data.responsetext);
+         },
+      });
+    $("#tag_search").val("");
+    autocompleteTags();
+});
+
+
+</script>
+
+<!--
+<script>
+
+    var items = '[{"Id":1,"Title":"/resources/output1.csv"},{"Id":2,"Title":"/home/utsav/b.txt"},{"Id":3,"Title":"/home/utsav/c.txt"},{"Id":4,"Title":"/home/utsav/d.txt"},{"Id":5,"Title":"/home/utsav/e.txt"},{"Id":6,"Title":"/home/utsav/f.txt"}]';
+    var pager = {};
+    pager.items = JSON.parse(items);
+    pager.itemsPerPage = 5;
+    pagerInit(pager);
+        
+    function bindList() {
+      var pgItems = pager.pagedItems[pager.currentPage];
+      $("#myList").empty();
+      for(var i = 0; i < pgItems.length; i++){
+        var option = $('<a class="list-group-item">');
+        for( var key in pgItems[i] ){
+          option.html(pgItems[i][key]);
+          option.prop('href', "file://///home/utsav/Downloads/admin.py");
+        }
+        $("#myList").append(option);
+      }
+    }
+    function prevPage(){
+      pager.prevPage();
+      bindList();
+    }
+    function nextPage(){
+      pager.nextPage();
+      bindList();
+    }
+    function pagerInit(p) {
+      p.pagedItems = [];
+      p.currentPage = 0;
+      if (p.itemsPerPage === undefined) {
+        p.itemsPerPage = 5;
+      }
+      p.prevPage = function () {
+	if (p.currentPage > 0) {
+          p.currentPage--;
+        }
+      };
+      p.nextPage = function () {
+        if (p.currentPage < p.pagedItems.length - 1) {
+          p.currentPage++;
+        }
+      };
+      init = function () {
+        for (var i = 0; i < p.items.length; i++) {
+          if (i % p.itemsPerPage === 0) {
+            p.pagedItems[Math.floor(i / p.itemsPerPage)] = [p.items[i]];
+          } else {
+            p.pagedItems[Math.floor(i / p.itemsPerPage)].push(p.items[i]);
+          }
+        }
+      };
+      init();
+    }		
+    $(function() {
+      bindList();
+    });
+</script>
+-->
+{% endblock %}
