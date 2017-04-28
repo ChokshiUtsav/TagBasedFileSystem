@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from nltk import word_tokenize as wtok
 from nltk.tag import pos_tag
 from collections import defaultdict
+import itertools
 import mimetypes
 import os
 import urllib
@@ -19,6 +20,7 @@ import random
 import eyed3
 import utility
 
+THRESHOLD_FOR_SUGGESTIONS = 5
 
 def create_input_for_apriori():
     f = open("./resources/input1.csv","w+")
@@ -32,21 +34,43 @@ def create_input_for_apriori():
     os.system("python ./resources/Apriori.py")
     return "hello"
 
-def find_linked_tags(assigned_tags):
+def findLinkedTags(assigned_tags,intent):
     mytags = assigned_tags
-    assigned_tags = tuple(sorted(assigned_tags))
+    suggested_tags = set()
     myfile = open("./resources/rules.pkl","rb")
     association_rules = pickle.load(myfile)
-    # print "rule1:",association_rules
-    try :
-        suggested_tags = list(association_rules[assigned_tags])
-    except :
-        suggested_tags = []
-    print "suggested_tags", suggested_tags
-    return suggested_tags
+    print assigned_tags,intent
+    if intent == "suggest":
+            combos = []
+            for L in range(0, len(assigned_tags)+1):
+              for subset in itertools.combinations(assigned_tags, L):
+                combos.append(subset)
+            combos.reverse()
+
+            for assigned_tags in combos[:-1]:   
+                if len(suggested_tags) > THRESHOLD_FOR_SUGGESTIONS:
+                    break
+                assigned_tags = tuple(sorted(assigned_tags))        
+                try :
+                    print suggested_tags
+                    suggested_tags=suggested_tags.union((association_rules[assigned_tags]))
+                except :
+                    continue
+            
+    elif intent == "search" :
+            try:
+                suggested_tags = association_rules[assigned_tags]
+            except:
+                pass
+    else:
+        print "invalid input",assigned_tags,intent
+    myfile.close()
+
+    print "suggested_tags", list(suggested_tags - set(mytags))
+    return list(suggested_tags - set(mytags))
 
 def create_graph_for_d3js(mytags):
-    suggested_tags = find_linked_tags(mytags)
+    suggested_tags = findLinkedTags(mytags,"search")
     len_source = len(mytags)
     len_target = len(suggested_tags)
     graph = {}

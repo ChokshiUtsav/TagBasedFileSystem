@@ -37,7 +37,7 @@ def findSuggestedTags(request):
 
     tags = []
     tags.append(ftype)
-    tags.extend(suggest_tags.find_linked_tags(assigned_tag_list))
+    tags.extend(suggest_tags.findLinkedTags(assigned_tags=assigned_tag_list,intent="suggest"))
     #print tags
     print ftype
     if ftype == "text":
@@ -202,7 +202,7 @@ def storeFilePath(request):
 
     else:
         eval_str += '$("#file_path_error").prop("hidden",false)';
-    print eval_str
+
     return HttpResponse(eval_str)
 
 
