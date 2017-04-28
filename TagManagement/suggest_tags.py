@@ -35,7 +35,7 @@ def create_input_for_apriori():
 def find_linked_tags(assigned_tags):
     mytags = assigned_tags
     assigned_tags = tuple(sorted(assigned_tags))
-    myfile = open("./resources/rules.txt","rb")
+    myfile = open("./resources/rules.pkl","rb")
     association_rules = pickle.load(myfile)
     # print "rule1:",association_rules
     try :

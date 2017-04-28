@@ -31,12 +31,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_cron',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'resources',
     'TagManagement',
 ]
 
@@ -118,6 +120,8 @@ USE_L10N = True
 USE_TZ = True
 
 
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 STATICFILES_DIRS = [
@@ -125,3 +129,8 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_URL = '/static/'
+CRON_CLASSES = [
+"TagManagement.cron.MyCronJob",
+"TagManagement.cron.MyCronJob1",
+# ...
+]

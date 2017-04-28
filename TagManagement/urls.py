@@ -9,7 +9,10 @@ urlpatterns = [
     url(r'^autoCompleteTags', views.autoCompleteTags, name='autoCompleteTags'),
     url(r'^maintainAssignedTags', views.maintainAssignedTags, name='maintainAssignedTags'),
     url(r'^storeFilePath', views.storeFilePath, name='storeFilePath'),
-    url(r'^clearTagLists', views.clearTagLists, name='clearTagLists'),
+    # url(r'^clearTagLists', views.clearTagLists, name='clearTagLists'),
+    url(r'^suggest',views.findSuggestedTags,name='findSuggestedTags'),
+    url(r'^notification',views.generateNotification,name='generateNotification'),
+    url(r'^test',views.test,name='test'),
     url(r'^addAllToAssignedTags', views.addAllToAssignedTags, name='addAllToAssignedTags'),
     url(r'^removeAssignedTags', views.removeAssignedTags, name='removeAssignedTags'),
   ]

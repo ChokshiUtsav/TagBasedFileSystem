@@ -1,14 +1,13 @@
 #!/usr/bin/python
-
 import math
 import itertools
 import sys
 import pickle
-
+import TagBasedFileSystem.path_variables as path
 # find input output parameters
+print path.HOME
 
-
-f=open('./resources/config.csv','r+')
+f=open(path.HOME+'resources/config.csv','r+')
 conf=f.read()
 f.close()
 global confidence
@@ -21,9 +20,9 @@ lines=conf.split('\n')
 for line in lines:
 	token=line.split(',')
 	if token[0]=="input":
-		inp=token[1]
+		inp=path.HOME+token[1]
 	if token[0]=="output":
-		out=token[1]
+		out=path.HOME+token[1]
 	if token[0]=="flag":
 		flag=token[1]
 	if token[0]=="support":
@@ -244,8 +243,8 @@ for rule in qual_rules:
 		d[key].update(list(rule[1]))
 	else :
 		d[key]=set(list(rule[1]))
-print d
-myfile = open("./resources/rules.pkl","wb")
+#print d
+myfile = open(path.HOME+"resources/rules.pkl","wb")
 pickle.dump(d,myfile)
 
 if(len(qual_rules)>0):
