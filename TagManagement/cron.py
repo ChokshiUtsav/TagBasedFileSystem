@@ -36,7 +36,7 @@ class MyCronJob1(CronJobBase): # finding files created in last 24 hours
     def do(self):
         # linux
         if _platform == "linux" or _platform == "linux2":
-           fileslist = os.system("find ~/[a-zA-Z0-9]* -mtime 0 -type f > "+path.HOME+"resources/modifiedFiles.txt")
+           fileslist = os.system("find ~[/[a-zA-Z0-9]*]{1,} -mtime 0 -type f > "+path.HOME+"resources/modifiedFiles.txt")
          # MAC OS X
         elif _platform == "darwin":
            fileslist = ""
@@ -45,10 +45,12 @@ class MyCronJob1(CronJobBase): # finding files created in last 24 hours
         elif _platform == "win32":
             fileslist = ""
 
+        print "newfiles"
         f = open(path.HOME+"resources/modifiedFiles.txt","r")
         for fle in f.readlines():
-            file_row = saveFiletoDB(fle)
-            mtime = timezone.make_aware(datetime.fromtimestamp(os.stat(fle).st_mtime))
+            print fle
+            file_row = saveFiletoDB(fle[:-1])
+            mtime = timezone.make_aware(datetime.datetime.fromtimestamp(os.stat(fle[:-1]).st_mtime))
 
             if mtime > file_row.mtime :
                 file_row.tagged_status = False
@@ -56,6 +58,7 @@ class MyCronJob1(CronJobBase): # finding files created in last 24 hours
             else : 
                 file_row.tagged_status = True
             file_row.save()
+        f.close()
 
 
 
