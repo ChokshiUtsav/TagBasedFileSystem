@@ -1,3 +1,4 @@
+
 function notification_list() {
   var x;
     $.ajax({ 
@@ -9,11 +10,13 @@ function notification_list() {
                       while(body[n]){
                           var options = {
                             body: body[n],
-                            icon: '{% static "/image/notification.png" %}',
+                            
+                            icon: '/static/image/notification.png',
+                            
                             dir : "ltr",
                           };
                           n = n+1;
-                          var notification = new Notification("Hi There",options);
+                          var notification = new Notification("Tag Based File System",options);
                       }
                      },
         error:function(data) {

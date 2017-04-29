@@ -4,7 +4,6 @@ from django.utils import timezone
 import os
 
 def getTagListForFile(request, complete_file_path):
-
     inode_number = os.stat(complete_file_path).st_ino
     file_rows = file_info.objects.filter(inode_number=inode_number)
     print file_rows

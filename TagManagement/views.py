@@ -15,6 +15,7 @@ import TagBasedFileSystem.path_variables as path
 import os, time
 import urllib
 import pickle
+import copy
 import random
 import utility
 import eyed3
@@ -52,9 +53,7 @@ def findSuggestedTags(request):
 
     print tags
     request.session['suggested_tag_list'] = tags
-    eval_str ='$("#suggested_tags").html(\''+renderTagsAsButtons(tags)+'\');'
-    return eval_str
-
+    return tags
 
 def findAutoCompleteTags(partial_tag_input):
     auto_complete_tags_list = []
@@ -119,7 +118,8 @@ def renderTagsAsButtons(tag_list):
     
 def updateView(request):
     eval_str = "$('#assigned_tags').html(\'"+renderTagsAsLabels(request.session['assigned_tag_list'].keys())+"\');"
-    eval_str += findSuggestedTags(request)
+    eval_str += '$("#suggested_tags").html(\''+renderTagsAsButtons(findSuggestedTags(request))+'\');'
+
     # print eval_str
     return eval_str
 
@@ -197,7 +197,7 @@ def storeFilePath(request):
         assigned_tag_dict = getTagListForFile(request, complete_file_path)
         request.session['assigned_tag_list'] = assigned_tag_dict
         if len(assigned_tag_dict.keys()) > 0:
-            request.session['extracted_assigned_tag_list'] = request.session['assigned_tag_list']
+            request.session['extracted_assigned_tag_list'] = copy.deepcopy(request.session['assigned_tag_list'])
         eval_str += updateView(request)
 
     else:
@@ -205,6 +205,27 @@ def storeFilePath(request):
 
     return HttpResponse(eval_str)
 
+def autoAssign(request):
+    refreshSession(request)
+    print request.session.keys(),request.session.values()
+    request.session['complete_file_path'] = request.POST['auto_assign_file_path'][:-1]
+
+    #retrieve already assigned tags for file, if any
+    assigned_tag_dict = getTagListForFile(request,request.session['complete_file_path'])
+    request.session['assigned_tag_list'] = assigned_tag_dict
+    request.session['extracted_assigned_tag_list'] = copy.deepcopy(request.session['assigned_tag_list'])
+    print "earlier extracted_tags=",request.session['extracted_assigned_tag_list']
+    for tag in findSuggestedTags(request):
+        request.session['assigned_tag_list'][tag]=1
+    request.session.modified = True
+    print "my assigned tags = ",request.session['assigned_tag_list']
+    print "now extracted_tags=",request.session['extracted_assigned_tag_list']
+    
+    assignTagsToFile(request)
+    return HttpResponse("success")
+
+
+    # return HttpResponse("success")
 
 def assignTags(request):
     #messages.add_message(request, messages.INFO, 'All items on this page have free shipping.')
@@ -220,12 +241,13 @@ def user(request):
 
 def assignTagsToFile(request):
     # extract file id
+    print request.session['extracted_assigned_tag_list']
     file_row = saveFiletoDB(request.session['complete_file_path'])
 
     tag_list_1 = set(request.session['assigned_tag_list'])                             # tags needs to be added
     tag_list_2 = set(request.session['extracted_assigned_tag_list'])                   # tags needs to be deleted  
     tag_list_1, tag_list_2 = (tag_list_1-tag_list_2), (tag_list_2-tag_list_1)   
-    
+    print tag_list_1,"\n",tag_list_2
     for tag in tag_list_2:
         tag_row = tag_info.objects.filter(tag_name=tag)[0]
         file_tag.objects.filter(file_id = file_row,tag_id=tag_row).delete()
