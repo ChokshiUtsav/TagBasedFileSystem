@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from TagManagement.models import *
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.contrib import admin
@@ -9,15 +10,18 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.contrib import messages
-
-import os
+from django.utils import timezone
+import TagBasedFileSystem.path_variables as path
+import os, time
 import urllib
 import pickle
+import copy
 import random
 import utility
 import eyed3
 from tag_dao import *
 import suggest_tags
+
 
 def findMostPopularTags():
     most_popular_tag_rows = tag_info.objects.all()
@@ -25,7 +29,7 @@ def findMostPopularTags():
     return most_popular_tag_list[:6]
 
 def index(request):
-    return render(request,'index.html', {})
+    return render(request,'index.html', {'new_files_list' : getListofModifiedFiles()})
 
 def findSuggestedTags(request):
     filename = request.session['complete_file_path']
@@ -34,22 +38,22 @@ def findSuggestedTags(request):
 
     tags = []
     tags.append(ftype)
-    tags.extend(suggest_tags.find_linked_tags(assigned_tag_list))
+    tags.extend(suggest_tags.findLinkedTags(assigned_tags=assigned_tag_list,intent="suggest"))
     #print tags
     print ftype
     if ftype == "text":
         entities = suggest_tags.findNamedEntities(filename)
     elif ftype == "audio":
         entities = suggest_tags.findMetadataforMusic(filename)
+    else:
+        entities = []
     # elif ftype == "video":
 
     tags.extend(entities)
 
     print tags
     request.session['suggested_tag_list'] = tags
-    eval_str ='$("#suggested_tags").html(\''+renderTagsAsButtons(tags)+'\');'
-    return eval_str
-
+    return tags
 
 def findAutoCompleteTags(partial_tag_input):
     auto_complete_tags_list = []
@@ -114,18 +118,21 @@ def renderTagsAsButtons(tag_list):
     
 def updateView(request):
     eval_str = "$('#assigned_tags').html(\'"+renderTagsAsLabels(request.session['assigned_tag_list'].keys())+"\');"
-    eval_str += findSuggestedTags(request)
+    eval_str += '$("#suggested_tags").html(\''+renderTagsAsButtons(findSuggestedTags(request))+'\');'
+
     # print eval_str
     return eval_str
 
 
 def maintainAssignedTags(request):
+    print "before",request.session['assigned_tag_list']
     key=str(request.POST['tag']).lower().strip()
     if 'assigned_tag_list' not in request.session:
         request.session['assigned_tag_list']={}
     request.session['assigned_tag_list'][key]=1
     findSuggestedTags(request)
     request.session.modified = True
+    print "after",request.session['assigned_tag_list']
     
     return HttpResponse(updateView(request))
 
@@ -152,15 +159,26 @@ def removeAssignedTags(request):
 
     return HttpResponse(updateView(request))
 
-def clearTagLists(request):
+def refreshSession(request):
+    user_dir = path.MOUNT_DIR
+    print path.MOUNT_DIR
+    request.session['user_dir'] = user_dir  
+    try:
+        file_path = request.POST['file_path']  
+    except:
+        file_path = "None"
+    most_popular_tag_list  = findMostPopularTags()
+    request.session['most_popular_tag_list'] = most_popular_tag_list
     request.session['assigned_tag_list']={}
     request.session['most_popular_tag_list'] = []
     request.session['suggested_tag_list'] = []
     request.session['extracted_assigned_tag_list'] = {}
-    return ""        
+    return locals()        
 
 def storeFilePath(request):
-    complete_file_path = request.session['user_dir'] + request.POST['file_path'][:-1]
+    print "FilePath",request.POST['file_path'][:-1]
+    #complete_file_path = request.session['user_dir'] + request.POST['file_path'][:-1]
+    complete_file_path = request.POST['file_path'][:-1]
     eval_str = ""
 
     if os.path.isfile(complete_file_path):
@@ -179,22 +197,41 @@ def storeFilePath(request):
         assigned_tag_dict = getTagListForFile(request, complete_file_path)
         request.session['assigned_tag_list'] = assigned_tag_dict
         if len(assigned_tag_dict.keys()) > 0:
-            request.session['extracted_assigned_tag_list'] = request.session['assigned_tag_list']
+            request.session['extracted_assigned_tag_list'] = copy.deepcopy(request.session['assigned_tag_list'])
         eval_str += updateView(request)
+
     else:
         eval_str += '$("#file_path_error").prop("hidden",false)';
 
     return HttpResponse(eval_str)
 
+def autoAssign(request):
+    refreshSession(request)
+    print request.session.keys(),request.session.values()
+    request.session['complete_file_path'] = request.POST['auto_assign_file_path'][:-1]
+
+    #retrieve already assigned tags for file, if any
+    assigned_tag_dict = getTagListForFile(request,request.session['complete_file_path'])
+    request.session['assigned_tag_list'] = assigned_tag_dict
+    request.session['extracted_assigned_tag_list'] = copy.deepcopy(request.session['assigned_tag_list'])
+    print "earlier extracted_tags=",request.session['extracted_assigned_tag_list']
+    for tag in findSuggestedTags(request):
+        request.session['assigned_tag_list'][tag]=1
+    request.session.modified = True
+    print "my assigned tags = ",request.session['assigned_tag_list']
+    print "now extracted_tags=",request.session['extracted_assigned_tag_list']
+    
+    assignTagsToFile(request)
+    return HttpResponse("success")
+
+
+    # return HttpResponse("success")
 
 def assignTags(request):
     #messages.add_message(request, messages.INFO, 'All items on this page have free shipping.')
-    clearTagLists(request)
-    user_dir = "/home/deeksha/"
-    request.session['user_dir'] = user_dir    
-    most_popular_tag_list  = findMostPopularTags()
-    request.session['most_popular_tag_list'] = most_popular_tag_list
-    return render(request,'assignTags.html', locals())
+    x = refreshSession(request)
+    print request.session.keys()
+    return render(request,'assignTags.html', x)
 
 def settings():
     return "Settings"
@@ -203,43 +240,36 @@ def user(request):
     return HttpResponse("nothing here")
 
 def assignTagsToFile(request):
-
-    #extract file id
-    inode_number = os.stat(request.session['complete_file_path']).st_ino
-
-    file_row = file_info.objects.filter(inode_number=inode_number)
-    if not file_row :
-        file_row = file_info(inode_number=inode_number,file_name=request.session['complete_file_path'])
-        file_row.save()
-    else:
-        file_row = file_row[0]
-    file_id = file_row.id
+    # extract file id
+    print request.session['extracted_assigned_tag_list']
+    file_row = saveFiletoDB(request.session['complete_file_path'])
 
     tag_list_1 = set(request.session['assigned_tag_list'])                             # tags needs to be added
     tag_list_2 = set(request.session['extracted_assigned_tag_list'])                   # tags needs to be deleted  
     tag_list_1, tag_list_2 = (tag_list_1-tag_list_2), (tag_list_2-tag_list_1)   
-    
+    print tag_list_1,"\n",tag_list_2
     for tag in tag_list_2:
         tag_row = tag_info.objects.filter(tag_name=tag)[0]
-        tag_id = tag_row.id
         file_tag.objects.filter(file_id = file_row,tag_id=tag_row).delete()
-
         tag_row.frequency = tag_row.frequency - 1
         tag_row.save()   
         
     for tag in tag_list_1:
-        tag_row = tag_info.objects.filter(tag_name=tag)
-        print tag_row
-        if tag_row:
-            tag_row = tag_row[0]
-            tag_row.frequency = tag_row.frequency + 1
-        else:
-            tag_row = tag_info(tag_name=tag,frequency=1)
-        tag_row.save()
-        tag_id = tag_row.id
+        tag_row = saveTagtoDB(tag)
         f = file_tag(file_id=file_row,tag_id=tag_row)
         f.save() 
 
     messages.add_message(request, messages.INFO, 'Tags are assigned to file : ' + request.session['complete_file_path'])
 
     return HttpResponse("Assigned Tags")
+
+def generateNotification(request):
+    notifications = getListofModifiedFiles()
+    count = notifications.count()
+    if count > 1 :  # if num of files >1, give culmulative notification
+        return HttpResponse(str(count)+" new files created ")
+    else :  #if only one file new, give filename in notification
+        return HttpResponse("New File"+notifications[0].file_name)
+
+def test(request):
+    return HttpResponse("test")

@@ -1,72 +1,290 @@
-23
+74
+
+2015
 2016
-d3
+bit-torrent
+client
+document
 iiit
 interview
-java-script
+juhi
+kanika
 links
-sigma
+personal
+scripting
+sem1
+study
 web
+2015,iiit
+2015,scripting
+2015,sem1
+2016,iiit
 2016,interview
 2016,links
-d3,java-script
-d3,sigma
-d3,web
+2016,study
+bit-torrent,client
+bit-torrent,iiit
+client,iiit
+document,personal
+iiit,interview
+iiit,links
+iiit,scripting
+iiit,sem1
+iiit,study
+iiit,web
 interview,links
-java-script,sigma
-java-script,web
-sigma,web
+interview,study
+interview,web
+juhi,kanika
+links,study
+links,web
+scripting,sem1
+study,web
+2015,iiit,scripting
+2015,iiit,sem1
+2015,scripting,sem1
+2016,iiit,interview
+2016,iiit,links
+2016,iiit,study
 2016,interview,links
-d3,java-script,sigma
-d3,java-script,web
-d3,sigma,web
-java-script,sigma,web
-d3,java-script,sigma,web
-47
-interview => 2016
+2016,interview,study
+2016,links,study
+bit-torrent,client,iiit
+iiit,interview,links
+iiit,interview,study
+iiit,interview,web
+iiit,links,study
+iiit,links,web
+iiit,scripting,sem1
+iiit,study,web
+interview,links,study
+interview,links,web
+interview,study,web
+links,study,web
+2015,iiit,scripting,sem1
+2016,iiit,interview,links
+2016,iiit,interview,study
+2016,iiit,links,study
+2016,interview,links,study
+iiit,interview,links,study
+iiit,interview,links,web
+iiit,interview,study,web
+iiit,links,study,web
+interview,links,study,web
+2016,iiit,interview,links,study
+iiit,interview,links,study,web
+214
+2015 => iiit
+2015 => scripting
+2015 => sem1
+2016 => iiit
 2016 => interview
 2016 => links
-links => 2016
-d3 => java-script
-java-script => d3
-sigma => d3
-web => d3
+2016 => study
+bit-torrent => client
+client => bit-torrent
+bit-torrent => iiit
+client => iiit
+personal => document
+document => personal
+interview => iiit
+links => iiit
+scripting => iiit
+sem1 => iiit
+study => iiit
+web => iiit
 interview => links
 links => interview
-sigma => java-script
-web => java-script
-web => sigma
-sigma => web
+study => interview
+interview => study
+web => interview
+juhi => kanika
+kanika => juhi
+study => links
+links => study
+web => links
+scripting => sem1
+sem1 => scripting
+web => study
+2015,scripting => iiit
+2015,iiit => scripting
+2015 => iiit,scripting
+2015,sem1 => iiit
+2015,iiit => sem1
+2015 => iiit,sem1
+2015,scripting => sem1
+2015,sem1 => scripting
+2015 => scripting,sem1
+2016 => iiit,interview
+2016,interview => iiit
+2016,iiit => interview
+2016 => iiit,links
+2016,links => iiit
+2016,iiit => links
+2016 => iiit,study
+2016,iiit => study
+2016,study => iiit
 2016 => interview,links
 2016,interview => links
-interview,links => 2016
 2016,links => interview
-links => 2016,interview
-interview => 2016,links
-d3,sigma => java-script
-sigma => d3,java-script
-java-script,sigma => d3
-web => d3,java-script
-d3,web => java-script
-java-script,web => d3
-d3,sigma => web
-web => d3,sigma
-sigma => d3,web
-d3,web => sigma
-sigma,web => d3
-web => java-script,sigma
-sigma => java-script,web
-java-script,sigma => web
-java-script,web => sigma
-sigma,web => java-script
-d3,sigma => java-script,web
-java-script,sigma,web => d3
-web => d3,java-script,sigma
-sigma => d3,java-script,web
-d3,sigma,web => java-script
-java-script,sigma => d3,web
-d3,java-script,web => sigma
-d3,web => java-script,sigma
-java-script,web => d3,sigma
-sigma,web => d3,java-script
-d3,java-script,sigma => web
+2016 => interview,study
+2016,interview => study
+2016,study => interview
+2016 => links,study
+2016,links => study
+2016,study => links
+bit-torrent,client => iiit
+bit-torrent => client,iiit
+client,iiit => bit-torrent
+bit-torrent,iiit => client
+client => bit-torrent,iiit
+iiit,interview => links
+interview,links => iiit
+iiit,links => interview
+links => iiit,interview
+interview => iiit,links
+iiit,interview => study
+study => iiit,interview
+interview => iiit,study
+iiit,study => interview
+interview,study => iiit
+iiit,web => interview
+web => iiit,interview
+interview,web => iiit
+links,study => iiit
+iiit,links => study
+study => iiit,links
+links => iiit,study
+iiit,study => links
+iiit,web => links
+web => iiit,links
+links,web => iiit
+scripting => iiit,sem1
+sem1 => iiit,scripting
+iiit,scripting => sem1
+scripting,sem1 => iiit
+iiit,sem1 => scripting
+iiit,web => study
+web => iiit,study
+study,web => iiit
+interview,links => study
+links,study => interview
+study => interview,links
+links => interview,study
+interview => links,study
+interview,study => links
+web => interview,links
+links,web => interview
+interview,web => links
+web => interview,study
+study,web => interview
+interview,web => study
+web => links,study
+links,web => study
+study,web => links
+2015,iiit,sem1 => scripting
+2015,iiit,scripting => sem1
+2015,scripting => iiit,sem1
+2015,scripting,sem1 => iiit
+2015,iiit => scripting,sem1
+2015 => iiit,scripting,sem1
+2015,sem1 => iiit,scripting
+2016 => iiit,interview,links
+2016,iiit,links => interview
+2016,interview => iiit,links
+2016,links => iiit,interview
+2016,iiit => interview,links
+2016,interview,links => iiit
+2016,iiit,interview => links
+2016,iiit,study => interview
+2016 => iiit,interview,study
+2016,interview => iiit,study
+2016,iiit => interview,study
+2016,study => iiit,interview
+2016,interview,study => iiit
+2016,iiit,interview => study
+2016,iiit,study => links
+2016 => iiit,links,study
+2016,iiit,links => study
+2016,links => iiit,study
+2016,iiit => links,study
+2016,study => iiit,links
+2016,links,study => iiit
+2016 => interview,links,study
+2016,interview => links,study
+2016,links => interview,study
+2016,study => interview,links
+2016,interview,study => links
+2016,interview,links => study
+2016,links,study => interview
+iiit,links,study => interview
+iiit,interview,links => study
+links,study => iiit,interview
+iiit,interview => links,study
+interview,links => iiit,study
+interview,links,study => iiit
+iiit,links => interview,study
+study => iiit,interview,links
+links => iiit,interview,study
+iiit,interview,study => links
+interview => iiit,links,study
+iiit,study => interview,links
+interview,study => iiit,links
+iiit,web => interview,links
+web => iiit,interview,links
+links,web => iiit,interview
+iiit,links,web => interview
+iiit,interview,web => links
+interview,web => iiit,links
+interview,links,web => iiit
+iiit,web => interview,study
+study,web => iiit,interview
+web => iiit,interview,study
+iiit,interview,web => study
+iiit,study,web => interview
+interview,web => iiit,study
+interview,study,web => iiit
+iiit,web => links,study
+links,study,web => iiit
+web => iiit,links,study
+iiit,links,web => study
+links,web => iiit,study
+study,web => iiit,links
+iiit,study,web => links
+links,study,web => interview
+web => interview,links,study
+links,web => interview,study
+study,web => interview,links
+interview,web => links,study
+interview,study,web => links
+interview,links,web => study
+2016,iiit,study => interview,links
+2016 => iiit,interview,links,study
+2016,iiit,links => interview,study
+2016,interview => iiit,links,study
+2016,iiit => interview,links,study
+2016,interview,links => iiit,study
+2016,links => iiit,interview,study
+2016,study => iiit,interview,links
+2016,iiit,interview => links,study
+2016,iiit,interview,links => study
+2016,interview,links,study => iiit
+2016,iiit,links,study => interview
+2016,iiit,interview,study => links
+2016,interview,study => iiit,links
+2016,links,study => iiit,interview
+study,web => iiit,interview,links
+iiit,links,web => interview,study
+iiit,study,web => interview,links
+iiit,interview,links,web => study
+iiit,interview,web => links,study
+iiit,interview,study,web => links
+links,study,web => iiit,interview
+iiit,links,study,web => interview
+web => iiit,interview,links,study
+links,web => iiit,interview,study
+interview,links,study,web => iiit
+iiit,web => interview,links,study
+interview,web => iiit,links,study
+interview,study,web => iiit,links
+interview,links,web => iiit,study
