@@ -17,6 +17,9 @@ function notification_list() {
                           };
                           n = n+1;
                           var notification = new Notification("Tag Based File System",options);
+                          notification.onclick = function() { 
+        window.location.href = '/';
+    };
                       }
                      },
         error:function(data) {

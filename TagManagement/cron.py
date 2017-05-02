@@ -7,6 +7,7 @@ from sys import platform as _platform
 import sys
 import TagBasedFileSystem.path_variables as path
 from tag_dao import *
+from TagManagement.views import *
 
 class MyCronJob(CronJobBase):
     RUN_EVERY_MINS = 120  # every 120 minutes
@@ -21,8 +22,9 @@ class MyCronJob(CronJobBase):
         for myfile in flist:
             mytags = file_tag.objects.filter(file_id=myfile['id']) #get all tags for file
             mytags = ",".join([str(tag_info.objects.filter(id = int(m.tag_id.id))[0].tag_name) for m in mytags ]) #get tagname against tagid
-            print mytags
-            f.write(str(mytags)+"\n")
+            if mytags : # newly created files have database entries but tags not assigned to them
+                print mytags
+                f.write(str(mytags)+"\n")
         f.close()
         #os.system("python "+path.HOME+"resources/Apriori.py")
         import resources.Apriori
@@ -36,7 +38,7 @@ class MyCronJob1(CronJobBase): # finding files created in last 24 hours
     def do(self):
         # linux
         if _platform == "linux" or _platform == "linux2":
-           fileslist = os.system("find ~[/[a-zA-Z0-9]*]{1,} -mtime 0 -type f > "+path.HOME+"resources/modifiedFiles.txt")
+           fileslist = os.system("find ~ -not -path '*/\.*' -not -path '*~' -mtime 0 -type f > "+path.HOME+"resources/modifiedFiles.txt")
          # MAC OS X
         elif _platform == "darwin":
            fileslist = ""
@@ -45,18 +47,15 @@ class MyCronJob1(CronJobBase): # finding files created in last 24 hours
         elif _platform == "win32":
             fileslist = ""
 
-        print "newfiles"
         f = open(path.HOME+"resources/modifiedFiles.txt","r")
         for fle in f.readlines():
-            print fle
-            file_row = saveFiletoDB(fle[:-1])
+            file_row = retrieveFileInfo(fle[:-1])
             mtime = timezone.make_aware(datetime.datetime.fromtimestamp(os.stat(fle[:-1]).st_mtime))
 
-            if mtime > file_row.mtime :
+            if file_row.mtime < mtime : # if file is modified since last entry in DB, change its tagged status to False
                 file_row.tagged_status = False
                 file_row.mtime = mtime
-            else : 
-                file_row.tagged_status = True
+            print file_row
             file_row.save()
         f.close()
 

@@ -19,10 +19,11 @@ import pickle
 import random
 import eyed3
 import utility
+from fbrecog import recognize
 
 THRESHOLD_FOR_SUGGESTIONS = 5
 
-def create_input_for_apriori():
+def createInputForApriori():
     f = open("./resources/input1.csv","w+")
     flist = file_info.objects.values('id')  # get all files in system
     for myfile in flist:
@@ -52,7 +53,7 @@ def findLinkedTags(assigned_tags,intent):
                     break
                 assigned_tags = tuple(sorted(assigned_tags))        
                 try :
-                    print suggested_tags
+                    # print "assigned",assigned_tags,"suggested",suggested_tags
                     suggested_tags=suggested_tags.union((association_rules[assigned_tags]))
                 except :
                     continue
@@ -69,7 +70,7 @@ def findLinkedTags(assigned_tags,intent):
     print "suggested_tags", list(suggested_tags - set(mytags))
     return list(suggested_tags - set(mytags))
 
-def create_graph_for_d3js(mytags):
+def createGraphFord3js(mytags):
     suggested_tags = findLinkedTags(mytags,"search")
     len_source = len(mytags)
     len_target = len(suggested_tags)
@@ -131,6 +132,16 @@ def findMetadataforMusic(filename):
         tags.append(genre)
     return list(set(tags))
 
+def findPeopleinImages(filename):
+    tags = []
+    access_token = "EAACEdEose0cBALwDjBoLzdHZBGMy5xMI77Snsxa5sJqOZBCfYhodDjLFOCQCVk7Uz7JIRdpeknYuYA2qVglDCoAW6NxS5ZC3QHD57CiFA7SUltodsdjsEgjILtqjTlqCCKffdZBaiXBUXgVjtUlBZCf98wqZBX7Px42ZA6iBYHTswe4ZB0mtFIl1OEiKLJIReZCkZD"
+    cookie = "sb=QlenV3k3pUM8dv2bC1dGzgsF; pl=y; lu=gAfAq5QLx0epAVLjrnOal0aA; datr=OFenVyfqFFm3fSPFLsNUpuyx; dats=1; c_user=100000506653866; xs=235%3Aj9_ZodDDmRFyyw%3A2%3A1490987252%3A4349; fr=0QecwBsLlyYq9CBlh.AWWOsCJj6Z3v7IJ7aRDT-tK2RXA.BYzlhU.qp.FkI.0.0.BZCEo5.AWUyEl-V; act=1493715521521%2F1; presence=EDvF3EtimeF1493715531EuserFA21B00506653866A2EstateFDutF1493715531975CEchFDp_5f1B00506653866F5CC"
+    fb_dtsg = "AQHy58ewSMR4:AQFb2g_eVHl3"
+    taglist = recognize(filename,access_token,cookie,fb_dtsg)
+    for person in taglist:
+        tags.append(person['name'])
+
+    return tags
 
 
 

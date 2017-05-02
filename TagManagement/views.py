@@ -29,7 +29,7 @@ def findMostPopularTags():
     return most_popular_tag_list[:6]
 
 def index(request):
-    return render(request,'index.html', {'new_files_list' : getListofModifiedFiles()})
+    return render(request,'index.html', {'new_files_list' : getListofUntaggedModifiedFiles()})
 
 def findSuggestedTags(request):
     filename = request.session['complete_file_path']
@@ -45,6 +45,12 @@ def findSuggestedTags(request):
         entities = suggest_tags.findNamedEntities(filename)
     elif ftype == "audio":
         entities = suggest_tags.findMetadataforMusic(filename)
+    elif ftype == "image":
+        try:
+            entities = request.session['image_tags']
+        except:
+            entities = suggest_tags.findPeopleinImages(filename)
+            request.session['image_tags'] = entities
     else:
         entities = []
     # elif ftype == "video":
@@ -52,14 +58,15 @@ def findSuggestedTags(request):
     tags.extend(entities)
 
     print tags
-    request.session['suggested_tag_list'] = tags
+
+    # suggest only those tags which are not already assigned
+    request.session['suggested_tag_list'] = list(set(tags)-set(request.session['assigned_tag_list'].keys()))
     return tags
 
 def findAutoCompleteTags(partial_tag_input):
     auto_complete_tags_list = []
 
-    if partial_tag_input:
-       #tag_input =  "%" + str(partial_tag_input).lower() + "%"         
+    if partial_tag_input:         
        auto_complete_tags_list = tag_info.objects.filter(tag_name__istartswith = partial_tag_input).order_by('frequency').reverse()
        print auto_complete_tags_list
        auto_complete_tags_list = [row.tag_name for row in auto_complete_tags_list]
@@ -125,25 +132,25 @@ def updateView(request):
 
 
 def maintainAssignedTags(request):
-    print "before",request.session['assigned_tag_list']
     key=str(request.POST['tag']).lower().strip()
     if 'assigned_tag_list' not in request.session:
         request.session['assigned_tag_list']={}
     request.session['assigned_tag_list'][key]=1
     findSuggestedTags(request)
     request.session.modified = True
-    print "after",request.session['assigned_tag_list']
-    
     return HttpResponse(updateView(request))
 
 def addAllToAssignedTags(request):
     key = str(request.POST['type']).lower()
+    
     if key == 'popular':
+        print request.session['most_popular_tag_list']
         for tag in request.session['most_popular_tag_list']:
             request.session['assigned_tag_list'][tag] = 1
     elif key == 'suggest':
         for tag in request.session['suggested_tag_list']:
             request.session['assigned_tag_list'][tag] = 1
+    request.session.modified = True
     return HttpResponse(updateView(request))
 
 
@@ -161,7 +168,6 @@ def removeAssignedTags(request):
 
 def refreshSession(request):
     user_dir = path.MOUNT_DIR
-    print path.MOUNT_DIR
     request.session['user_dir'] = user_dir  
     try:
         file_path = request.POST['file_path']  
@@ -170,9 +176,8 @@ def refreshSession(request):
     most_popular_tag_list  = findMostPopularTags()
     request.session['most_popular_tag_list'] = most_popular_tag_list
     request.session['assigned_tag_list']={}
-    request.session['most_popular_tag_list'] = []
-    request.session['suggested_tag_list'] = []
     request.session['extracted_assigned_tag_list'] = {}
+    request.session.modified = True
     return locals()        
 
 def storeFilePath(request):
@@ -194,7 +199,7 @@ def storeFilePath(request):
         request.session['complete_file_path'] = complete_file_path
 
         #retrieve already assigned tags for file, if any
-        assigned_tag_dict = getTagListForFile(request, complete_file_path)
+        assigned_tag_dict = getTagListForFile(complete_file_path)
         request.session['assigned_tag_list'] = assigned_tag_dict
         if len(assigned_tag_dict.keys()) > 0:
             request.session['extracted_assigned_tag_list'] = copy.deepcopy(request.session['assigned_tag_list'])
@@ -211,26 +216,20 @@ def autoAssign(request):
     request.session['complete_file_path'] = request.POST['auto_assign_file_path'][:-1]
 
     #retrieve already assigned tags for file, if any
-    assigned_tag_dict = getTagListForFile(request,request.session['complete_file_path'])
+    assigned_tag_dict = getTagListForFile(request.session['complete_file_path'])
     request.session['assigned_tag_list'] = assigned_tag_dict
     request.session['extracted_assigned_tag_list'] = copy.deepcopy(request.session['assigned_tag_list'])
-    print "earlier extracted_tags=",request.session['extracted_assigned_tag_list']
     for tag in findSuggestedTags(request):
         request.session['assigned_tag_list'][tag]=1
-    request.session.modified = True
-    print "my assigned tags = ",request.session['assigned_tag_list']
-    print "now extracted_tags=",request.session['extracted_assigned_tag_list']
     
+    request.session.modified = True
     assignTagsToFile(request)
+    
     return HttpResponse("success")
-
-
-    # return HttpResponse("success")
 
 def assignTags(request):
     #messages.add_message(request, messages.INFO, 'All items on this page have free shipping.')
     x = refreshSession(request)
-    print request.session.keys()
     return render(request,'assignTags.html', x)
 
 def settings():
@@ -239,15 +238,39 @@ def settings():
 def user(request):
     return HttpResponse("nothing here")
 
+
+def addDefaultTagstoNewFile(filename):
+    if path.FOLDER_HEIRARCHY_AS_TAG_FLAG == True:
+        parent_dir = os.path.abspath(os.path.join(filename, os.pardir))
+        default_tags = parent_dir.split("/")
+        for tag in default_tags:
+            addTagToFile(tag,filename)
+    
+    # ftype = utility.findFileType(filename)
+    # addTagToFile(ftype,filename)    
+    
+def addNewFileinSystem(filename):
+    saveFiletoDB(filename)
+    addDefaultTagstoNewFile(filename)
+
+def retrieveFileInfo(filename):
+    f = getFileRecordfromFilepath(filename)
+    if f:
+        myfile = f
+    else:
+        # new file in system
+        addNewFileinSystem(filename)
+        myfile = getFileRecordfromFilepath(filename)
+    return myfile
+
 def assignTagsToFile(request):
     # extract file id
-    print request.session['extracted_assigned_tag_list']
-    file_row = saveFiletoDB(request.session['complete_file_path'])
+    file_row = retrieveFileInfo(request.session['complete_file_path'])
 
     tag_list_1 = set(request.session['assigned_tag_list'])                             # tags needs to be added
     tag_list_2 = set(request.session['extracted_assigned_tag_list'])                   # tags needs to be deleted  
     tag_list_1, tag_list_2 = (tag_list_1-tag_list_2), (tag_list_2-tag_list_1)   
-    print tag_list_1,"\n",tag_list_2
+    
     for tag in tag_list_2:
         tag_row = tag_info.objects.filter(tag_name=tag)[0]
         file_tag.objects.filter(file_id = file_row,tag_id=tag_row).delete()
@@ -260,11 +283,12 @@ def assignTagsToFile(request):
         f.save() 
 
     messages.add_message(request, messages.INFO, 'Tags are assigned to file : ' + request.session['complete_file_path'])
-
+    updateFileTaggedStatus(request.session['complete_file_path'])
+    
     return HttpResponse("Assigned Tags")
 
 def generateNotification(request):
-    notifications = getListofModifiedFiles()
+    notifications = getListofUntaggedModifiedFiles()
     count = notifications.count()
     if count > 1 :  # if num of files >1, give culmulative notification
         return HttpResponse(str(count)+" new files created ")
