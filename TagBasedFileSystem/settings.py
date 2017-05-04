@@ -133,5 +133,6 @@ STATIC_URL = '/static/'
 CRON_CLASSES = [
 "TagManagement.cron.MyCronJob",
 "TagManagement.cron.MyCronJob1",
+"TagManagement.cron.MyCronJob2",
 # ...
 ]

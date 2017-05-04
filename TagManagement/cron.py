@@ -59,9 +59,26 @@ class MyCronJob1(CronJobBase): # finding files created in last 24 hours
             file_row.save()
         f.close()
 
+class MyCronJob2(CronJobBase): # finding files created in last 24 hours
+    RUN_EVERY_MINS = 24*60  # every 120 minutes
+    # RUN_AT_TIMES = ['15:48']
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'file.purgeFile_Infotable' # a unique code
+    
+    def removeTagForFile(self,filename):
+        tag_list = getTagListForFile(filename)
+        for tag in tag_list:
+            removeTagFromFile(tag,filename)
 
-
-                    
+    def do(self):
+        file_list = file_info.objects.all()
+        for f in file_list:
+            if not os.path.isfile(f.file_name):
+                self.removeTagForFile(f.file_name)
+                removeFileFromDB(f.file_name)
+           
+                print "Deleting:",f.file_name
+                
 
 
 

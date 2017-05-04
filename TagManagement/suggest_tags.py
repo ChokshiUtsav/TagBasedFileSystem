@@ -93,7 +93,7 @@ def findNamedEntities(filename):
     save = ""
     #noun chunking
     for word_tag in content:
-        word = word_tag[0]
+        word = word_tag[0].lower().strip()
         postag = word_tag[1]
 
         if postag == "NNP" or postag == "NN" or postag == "NNS":
@@ -117,21 +117,21 @@ def findMetadataforMusic(filename):
     audiofile = eyed3.load(filename)
     if audiofile.tag.artist:
         artistlist = audiofile.tag.artist.replace(' ','-').split(',')
-        tags.extend([artist for artist in artistlist])
+        tags.extend([artist.lower().strip() for artist in artistlist])
 
     if audiofile.tag.album:
-        album = audiofile.tag.album.replace(' ','-')
+        album = audiofile.tag.album.replace(' ','-').lower().strip()
         tags.append(album)
 
     if audiofile.tag.album_artist:
-        album_artist = audiofile.tag.album_artist.replace(' ','-')
+        album_artist = audiofile.tag.album_artist.replace(' ','-').lower().strip()
         tags.append(album_artist)
 
     if audiofile.tag.recording_date and audiofile.tag.recording_date.year:
         tags.append(str(audiofile.tag.recording_date.year))
 
     if audiofile.tag.genre.name:
-        genre = audiofile.tag.genre.name.replace(' ','-')
+        genre = audiofile.tag.genre.name.replace(' ','-').lower().strip()
         tags.append(genre)
     return list(set(tags))
 
@@ -142,7 +142,9 @@ def findPeopleinImages(filename):
     fb_dtsg = "AQHy58ewSMR4:AQFb2g_eVHl3"
     taglist = recognize(filename,access_token,cookie,fb_dtsg)
     for person in taglist:
-        tags.append(person['name'])
+        tags.append(person['name'].lower().strip())
+            
+    print "find people-",tags
 
     return tags
 
