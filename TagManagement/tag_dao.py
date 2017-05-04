@@ -19,11 +19,6 @@ def getTagListForFile(complete_file_path):
 
     return tag_dict
 
-'''
-f = file_info(inode_number=inode_number,file_name=file_name)
-f.save()
-'''
-
 def saveFiletoDB(filepath):
     stat = os.stat(filepath)
     inode_number = stat.st_ino
@@ -41,13 +36,13 @@ def saveFiletoDB(filepath):
     return file_row
 
 def saveTagtoDB(tag):
-    tag_row = tag_info.objects.filter(tag_name=tag)
+    tag_row = tag_info.objects.filter(tag_name=tag.lower())
     
     if tag_row :
         tag_row = tag_row[0]
         tag_row.frequency = tag_row.frequency + 1
     else :
-        tag_row = tag_info(tag_name=tag,frequency=1)
+        tag_row = tag_info(tag_name=tag.lower(),frequency=1)
     tag_row.save()
     return tag_row
 

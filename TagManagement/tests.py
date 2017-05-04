@@ -59,9 +59,3 @@ class viewsTesting(TestCase):
 		except:
 			msg = "no record"
 		self.assertEqual(msg,"record found","retrieveFile failed")
-
-
-
-
-
-

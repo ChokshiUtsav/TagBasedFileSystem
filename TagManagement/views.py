@@ -206,7 +206,7 @@ def storeFilePath(request):
         eval_str += updateView(request)
 
     else:
-        eval_str += '$("#file_path_error").prop("hidden",false)';
+        eval_str += '$("#file_path_error").prop("hidden",false)'
 
     return HttpResponse(eval_str)
 
@@ -244,7 +244,8 @@ def addDefaultTagstoNewFile(filename):
         parent_dir = os.path.abspath(os.path.join(filename, os.pardir))
         default_tags = parent_dir.split("/")
         for tag in default_tags:
-            addTagToFile(tag,filename)
+            if tag : 
+                addTagToFile(tag.lower(),filename)
     
     # ftype = utility.findFileType(filename)
     # addTagToFile(ftype,filename)    
@@ -272,13 +273,13 @@ def assignTagsToFile(request):
     tag_list_1, tag_list_2 = (tag_list_1-tag_list_2), (tag_list_2-tag_list_1)   
     
     for tag in tag_list_2:
-        tag_row = tag_info.objects.filter(tag_name=tag)[0]
+        tag_row = tag_info.objects.filter(tag_name=tag.lower())[0]
         file_tag.objects.filter(file_id = file_row,tag_id=tag_row).delete()
         tag_row.frequency = tag_row.frequency - 1
         tag_row.save()   
         
     for tag in tag_list_1:
-        tag_row = saveTagtoDB(tag)
+        tag_row = saveTagtoDB(tag.lower())
         f = file_tag(file_id=file_row,tag_id=tag_row)
         f.save() 
 

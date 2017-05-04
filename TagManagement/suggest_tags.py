@@ -36,6 +36,7 @@ def createInputForApriori():
     return "hello"
 
 def findLinkedTags(assigned_tags,intent):
+    assigned_tags = [ a.lower() for a in assigned_tags ]
     mytags = assigned_tags
     suggested_tags = set()
     myfile = open("./resources/rules.pkl","rb")
@@ -60,6 +61,7 @@ def findLinkedTags(assigned_tags,intent):
             
     elif intent == "search" :
             try:
+                assigned_tags = tuple(sorted(assigned_tags))
                 suggested_tags = association_rules[assigned_tags]
             except:
                 pass
@@ -77,7 +79,8 @@ def createGraphFord3js(mytags):
     graph = {}
     graph['nodes'] = [{'name':t,'group':1} for t in mytags]
     graph['nodes'].extend([{'name':t,'group':2} for t in suggested_tags])
-    graph['links']=[{'source':random.choice(range(len_source)),'target':t} for t in range(len_source,len_source+len_target) ]
+    graph['links'] = [{'source': i, 'target': i+1} for i in range(len(mytags)-1)]
+    graph['links'].extend([{'source':random.choice(range(len_source)),'target':t} for t in range(len_source,len_source+len_target) ])
     print graph
     return graph
 
