@@ -2,6 +2,7 @@
 {% load static %}
 {% block content %} 
 
+<link rel="stylesheet" type="text/css" href="{% static '/css/loading.css' %}">
 {% if messages %}
   {% for msg in messages %}
     <div class="alert alert-info alert-dismissable">
@@ -95,6 +96,7 @@
     </div>
   </div>
 </div>
+ <div class="loading" id="loader" sty></div>
 
 <div class="col-md-4">
   <div class="panel panel-info">
@@ -133,6 +135,7 @@ $(document).ready(function(){
     $('#suggestion_div').find(":input").prop("disabled",true);
     $('#assign_div').find(":input").prop("disabled",true);
     $("#file_path_error").prop("hidden",true);
+    $('#loader').hide();
 
     if("{{file_path}}"!="None")
     {
@@ -254,13 +257,17 @@ $("#file_suggestions").on('click','.list-group-item', function(){
 
 function storeFilepathCall(dct)
 {
+  $('#loader').show();
   $.ajax({
          url: "/tag/storeFilePath/",
          type: "POST",
          data: dct,
          async: 'true',
+         //beforeSend: function() { $('#loader').prop("hidden",false); },
+         //complete: function() { $('#loader').prop("hidden",true); }
          success: function(data) {
             eval(data);
+            $('#loader').hide();
             //console.log(data);
          },
          error:function(data) {

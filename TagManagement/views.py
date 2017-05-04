@@ -39,26 +39,22 @@ def findSuggestedTags(request):
     tags = []
     tags.append(ftype)
     tags.extend(suggest_tags.findLinkedTags(assigned_tags=assigned_tag_list,intent="suggest"))
-    #print tags
-    print ftype
     if ftype == "text":
         entities = suggest_tags.findNamedEntities(filename)
     elif ftype == "audio":
         entities = suggest_tags.findMetadataforMusic(filename)
     elif ftype == "image":
-        try:
+        if 'image_tags' in request.session.keys() and request.session['image_tags']!=None:
             entities = request.session['image_tags']
-        except:
+        else:
             entities = suggest_tags.findPeopleinImages(filename)
             request.session['image_tags'] = entities
     else:
         entities = []
     # elif ftype == "video":
-
     tags.extend(entities)
-
-    print tags
-
+    print "find suggested tags:,",tags
+    print "assigned_tags_list",request.session['assigned_tag_list']
     # suggest only those tags which are not already assigned
     request.session['suggested_tag_list'] = list(set(tags)-set(request.session['assigned_tag_list'].keys()))
     return tags
@@ -177,6 +173,7 @@ def refreshSession(request):
     request.session['most_popular_tag_list'] = most_popular_tag_list
     request.session['assigned_tag_list']={}
     request.session['extracted_assigned_tag_list'] = {}
+    request.session['image_tags'] = None
     request.session.modified = True
     return locals()        
 
@@ -273,10 +270,7 @@ def assignTagsToFile(request):
     tag_list_1, tag_list_2 = (tag_list_1-tag_list_2), (tag_list_2-tag_list_1)   
     
     for tag in tag_list_2:
-        tag_row = tag_info.objects.filter(tag_name=tag.lower())[0]
-        file_tag.objects.filter(file_id = file_row,tag_id=tag_row).delete()
-        tag_row.frequency = tag_row.frequency - 1
-        tag_row.save()   
+        removeTagFromFile(tag,request.session['complete_file_path'])     
         
     for tag in tag_list_1:
         tag_row = saveTagtoDB(tag.lower())

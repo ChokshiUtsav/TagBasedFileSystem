@@ -10,12 +10,12 @@ import TagBasedFileSystem.path_variables as path
 import TagManagement.views as view
 
 
-class tag_daoTesting(TestCase):
+def makeDB():
+	# crons job file is always modified in 24 hours
+	filename = path.MOUNT_DIR+"crons.log"
+	td.saveFiletoDB(filename)
 
-	def makeDB(self):
-		# crons job file is always modified in 24 hours
-		filename = path.MOUNT_DIR+"crons.log"
-		td.saveFiletoDB(filename)
+class tag_daoTesting(TestCase):
 
 	def testsaveFiletoDB(self):
 		# crons job file is always modified in 24 hours
@@ -24,24 +24,37 @@ class tag_daoTesting(TestCase):
 		self.assertEqual(1,file_info.objects.all().count(),"saveFiletoDB failed")
 
 	def testgetFileRecordfromFilepath(self):
-		self.makeDB()
+		makeDB()
 		filename = path.MOUNT_DIR+"crons.log"
 		x = td.getFileRecordfromFilepath(filename)
 		self.assertEqual(filename,x.file_name,"getFileRecordfromFilepath failed")
 
 	def testaddtagtoFile(self):
-		self.makeDB()
+		makeDB()
 		filename = path.MOUNT_DIR+"crons.log"
 		td.addTagToFile("newtag",filename)
+		self.assertEqual(tag_info.objects.filter(tag_name="newtag")[0].frequency,1,"tag not added to file")
+		self.assertEqual(td.getFileRowsForTag("newtag").count(),1,"no file added for newtag")
+
+	def testremoveTagFromFile(self):
+		makeDB()
+		filename = path.MOUNT_DIR+"crons.log"
+		td.addTagToFile("newtag",filename)
+		td.removeTagFromFile("newtag",filename)
+		self.assertEqual(tag_info.objects.filter(tag_name="newtag")[0].frequency,0,"tag not removed file")
+		self.assertEqual(td.getFileRowsForTag("newtag").count(),0,"no file removed for newtag")
+
+	def testremoveFileFromDB(self):
+		makeDB()
+		filepath = path.MOUNT_DIR+"crons.log"
+		td.removeFileFromDB(filepath)
+		self.assertEqual(file_info.objects.all().count(),0,"file not removed")
+
 
 class viewsTesting(TestCase):
-	def makeDB(self):
-		# crons job file is always modified in 24 hours
-		filename = path.MOUNT_DIR+"crons.log"
-		td.saveFiletoDB(filename)
 
 	def testretrieveFileInfo(self):
-		self.makeDB()
+		makeDB()
 		filename = path.MOUNT_DIR+"somenonexistentfile"
 		try:
 			view.retrieveFileInfo(filename)
@@ -59,3 +72,9 @@ class viewsTesting(TestCase):
 		except:
 			msg = "no record"
 		self.assertEqual(msg,"record found","retrieveFile failed")
+
+
+
+
+
+
