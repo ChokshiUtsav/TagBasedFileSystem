@@ -4,15 +4,17 @@ from django.utils import timezone
 import os
 
 def getTagListForFile(complete_file_path):
-    inode_number = os.stat(complete_file_path).st_ino
-    file_rows = file_info.objects.filter(inode_number=inode_number)
-    print file_rows
     tag_dict = {}
+    try :
+        inode_number = os.stat(complete_file_path).st_ino
+        file_rows = file_info.objects.filter(inode_number=inode_number)
+
+    except :    # if file is already deleted
+        file_rows = file_info.objects.filter(file_name = complete_file_path)
 
     if len(file_rows) > 0:
         file_id = file_rows[0].id
         tag_rows = file_tag.objects.filter(file_id=file_rows[0])
-        print tag_rows
         for tr in tag_rows:
             tag = tag_info.objects.filter(id=tr.tag_id.id)[0].tag_name
             tag_dict[tag] = 1
@@ -32,7 +34,6 @@ def saveFiletoDB(filepath):
         file_row.file_name = filepath
 
     file_row.save()
-    print file_row
     return file_row
 
 def saveTagtoDB(tag):
@@ -53,6 +54,24 @@ def addTagToFile(tag,filename):
     f = file_tag(file_id=file_row,tag_id=tag_row)
     f.save() 
 
+def removeTagFromFile(tag,filename):
+    file_row = getFileRecordfromFilepath(filename)
+    tag_row = tag_info.objects.filter(tag_name=tag)
+    if tag_row:
+        tag_row = tag_row[0]
+        file_tag.objects.filter(file_id = file_row,tag_id=tag_row).delete()
+        tag_row.frequency = tag_row.frequency - 1
+        tag_row.save()   
+    else:
+        raise Exception("No such Tag found to remove")
+
+def removeFileFromDB(filepath):
+    file_row = getFileRecordfromFilepath(filepath).delete()
+
+def removeTagFromDB(tag):
+    tag_info.objects.filter(tag_name=tag).delete()
+
+
 def getTagnameFromTagid(tag_id):
     return tag_info.objects.filter(id=tag_id)[0].tag_name
 
@@ -63,21 +82,29 @@ def getListofUntaggedModifiedFiles():
     list_of_modified_files = file_info.objects.filter(mtime__gt = timezone.now()-datetime.timedelta(hours=path.SAVE_NOTIFICATION_FOR_X_HOURS),tagged_status=False)
     return list_of_modified_files
 
+def checkRenameOfFile(file_row,filepath):
+    if file_row and filepath != file_row[0].file_name:
+        f = file_row[0]
+        f.file_name = filepath
+        f.save()
+
 def getFileRecordfromFilepath(filepath):
-    stat = os.stat(filepath)
-    inode_number = stat.st_ino
-    file_row = file_info.objects.filter(inode_number=inode_number)
+    try:
+        stat = os.stat(filepath)
+        inode_number = stat.st_ino
+        file_row = file_info.objects.filter(inode_number=inode_number)
+        
+    except :    # if file is already deleted
+        file_row = file_info.objects.filter(file_name = filepath)
 
-    #if file renamed
+    checkRenameOfFile(file_row,filepath)
+
     if file_row:
-        if filepath != file_row[0].file_name:
-            f = file_row[0]
-            f.file_name = filepath
-            f.save()
         return file_row[0]
-
     else:
         return None
+
+
 def getFileRowsForTag(tag):
     tag_row = getTagRowFromTagname(tag)
     file_rows = file_tag.objects.filter(tag_id=tag_row)
