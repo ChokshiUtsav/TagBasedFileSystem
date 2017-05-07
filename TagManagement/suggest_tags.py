@@ -137,9 +137,9 @@ def findMetadataforMusic(filename):
 
 def findPeopleinImages(filename):
     tags = []
-    access_token = "EAACEdEose0cBALwDjBoLzdHZBGMy5xMI77Snsxa5sJqOZBCfYhodDjLFOCQCVk7Uz7JIRdpeknYuYA2qVglDCoAW6NxS5ZC3QHD57CiFA7SUltodsdjsEgjILtqjTlqCCKffdZBaiXBUXgVjtUlBZCf98wqZBX7Px42ZA6iBYHTswe4ZB0mtFIl1OEiKLJIReZCkZD"
-    cookie = "sb=QlenV3k3pUM8dv2bC1dGzgsF; pl=y; lu=gAfAq5QLx0epAVLjrnOal0aA; datr=OFenVyfqFFm3fSPFLsNUpuyx; dats=1; c_user=100000506653866; xs=235%3Aj9_ZodDDmRFyyw%3A2%3A1490987252%3A4349; fr=0QecwBsLlyYq9CBlh.AWWOsCJj6Z3v7IJ7aRDT-tK2RXA.BYzlhU.qp.FkI.0.0.BZCEo5.AWUyEl-V; act=1493715521521%2F1; presence=EDvF3EtimeF1493715531EuserFA21B00506653866A2EstateFDutF1493715531975CEchFDp_5f1B00506653866F5CC"
-    fb_dtsg = "AQHy58ewSMR4:AQFb2g_eVHl3"
+    access_token = "EAACEdEose0cBAK9K6pkwC14OcUmTJZCJsvTEp0ZCWAHNrvX1T5DcDE6ysYLssauZBXLZAm5csnd0CqIkfhhPybxJZBakrQZCyhZBfkRRautFDmmK9ZCHPyagHlJ36AEo7HzbfFJZCRLvEwCZAZCdDVMvO1ZAHu2NisienktAWZCI0Qo5BvdPFHZBrXHryZANtF7Isl7GOUZD"
+    cookie = "sb=WGkHVw7DP8963aSs596mv06E; lu=TgbS1igAiSpQSJvk0jM4y2Ww; act=1494163402652/20; datr=Pr_WVU8EmTgHw73XLNithP2p; dats=1; c_user=100001779640836; xs=67:b5JJui_l7Dgcnw:2:1485616283:18409; fr=0yC3EEcA81Cj99RAi.AWV8ShvRPxm3JJ6Js9XX8Aqt1bc.BVvlmD.Gi.FkH.0.0.BZDwTz.AWWXT3Zr; presence=EDvF3EtimeF1494156981EuserFA21B01779640836A2EstateFDt3F"
+    fb_dtsg = "AQFt-IPOJOAd:AQGLu1alNmDy"
     taglist = recognize(filename,access_token,cookie,fb_dtsg)
     for person in taglist:
         tags.append(person['name'].lower().strip())
@@ -147,8 +147,3 @@ def findPeopleinImages(filename):
     print "find people-",tags
 
     return tags
-
-
-
-
-   

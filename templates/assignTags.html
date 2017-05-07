@@ -96,7 +96,7 @@
     </div>
   </div>
 </div>
- <div class="loading" id="loader" sty></div>
+<div class="loading" id="loader"></div>
 
 <div class="col-md-4">
   <div class="panel panel-info">
@@ -268,7 +268,6 @@ function storeFilepathCall(dct)
          success: function(data) {
             eval(data);
             $('#loader').hide();
-            //console.log(data);
          },
          error:function(data) {
             console.log("Error:"+data.responsetext);
@@ -343,12 +342,14 @@ $("#refresh_all").click(function(){
 });
 
 $('#assign_all').click(function(){
+  $('#loader').show();
   dct = {};
   $.ajax({
        url: "/tag/assignTagsToFile/",
        type: "POST",
        success: function(data) {
-        location.href = "/tag/assignTags/";
+          location.href = "/tag/assignTags/";
+           $('#loader').hide();
        },
        error:function(data) {
           console.log("Error");
@@ -392,24 +393,5 @@ $('#suggested_tags').on('click','.btn',function(){
        },
     });
 });
-
-
-function updateSuggestedTags()
-{
-  dct = {};
-    $.ajax({
-       url: "/tag/suggest/",
-       type: "POST",
-       data: dct,
-       async: 'true',
-       success: function(data) {
-         eval(data);
-       },
-       error:function(data) {
-          console.log("Error:"+data.responsetext);
-       },
-    });
-
-}
 </script>
 {% endblock %}

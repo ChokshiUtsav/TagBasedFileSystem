@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script type="text/javascript" src="{% static 'js/ForceDirectedGraph.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/Pagination.js' %}"></script>
 <link href="{% static 'css/ForceDirectedGraph.css' %}" rel="stylesheet"/>
 
 <div class="col-md-6" id="io_div">
@@ -31,8 +30,8 @@
       			<label><h3>Filtered Files : </h3></label>
       			<ul id="filtered_file_list" class="list-group"></ul>
 		        <ul class="pager">
-        			<li class="previous"><a href="" onclick="prevPage(); return false;">«</a></li>
-          			<li class="next"><a href="" onclick="nextPage(); return false;">»</a></li>
+        	   		<li class="previous"><a href="" onclick="prevPage('search'); return false;"> « </a></li>
+          	   	<li class="next"><a href="" onclick="nextPage('search'); return false;"> » </a></li>
         		</ul>
       		</div>
 		</div>
@@ -44,7 +43,7 @@
 	 			<label><h3>Selected Tags : </h3></label>
 	 			<button class="btn btn-primary" type="button" id="filter_submit" style="float:right; margin-top:10px"> 
                   <span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>  
-            	</button>
+        </button>
 	 		<div id="selected_tag_div">
 	 		</div>
 	 		<div id="graph_div">
@@ -87,7 +86,7 @@ $("#tag_search_submit").click(function(){
   	dct['tag'] = $('#tag_search').val();
   	dct['action'] = 'add';
   	dct['empty_tag_list'] = 'true';
-	$.ajax({
+	  $.ajax({
          url: "/search/getGraphData/",
          type: "POST",
          data: dct,
@@ -112,7 +111,7 @@ $("#filter_submit").click(function(){
          data: dct,
          async: 'true',
          success: function(data) {
-			createFileList("#filtered_file_list", jQuery.parseJSON(data));       	
+            createFileList("#filtered_file_list", jQuery.parseJSON(data), "search");       	
          },
          error:function(data) {
             console.log("Error:"+data.responsetext);

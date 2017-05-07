@@ -32,12 +32,12 @@ function createGraph(element_id, graph_json){
     }
 
     var width = 500;
-        height = 400;
+        height = 500;
 
     var force = d3.layout.force()
         .size([width, height])
         .charge(-900)
-        .linkDistance(200)
+        .linkDistance(100)
         .on("tick", tick);
 
     var drag = force.drag()
