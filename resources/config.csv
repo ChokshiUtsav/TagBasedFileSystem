@@ -1,5 +1,5 @@
 input,resources/input1.csv
 output,resources/output1.csv
-support,0.1
-confidence,0.35
+support,0.01
+confidence,0.2
 flag,1
