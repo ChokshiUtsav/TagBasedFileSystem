@@ -31,26 +31,26 @@ function DonutCharts() {
 
     var createLegend = function(catNames) {
         var legends = charts.select('.legend')
-                        .selectAll('g')
+                            .selectAll('g')
                             .data(catNames)
-                        .enter().append('g')
+                            .enter().append('g')
                             .attr('transform', function(d, i) {
                                 return 'translate(' + (i * 150 + 50) + ', 10)';
                             });
 
         legends.append('circle')
-            .attr('class', 'legend-icon')
-            .attr('r', 6)
-            .style('fill', function(d, i) {
-                return color(i);
-            });
+               .attr('class', 'legend-icon')
+                .attr('r', 6)
+                .style('fill', function(d, i) {
+                    return color(i);
+        });
 
         legends.append('text')
-            .attr('dx', '1em')
-            .attr('dy', '.3em')
-            .text(function(d) {
-                return d;
-            });
+                .attr('dx', '1em')
+                .attr('dy', '.3em')
+                .text(function(d) {
+                    return d;
+        });
     }
 
     var createCenter = function(pie) {
@@ -234,8 +234,8 @@ function DonutCharts() {
 
     this.create = function(dataset) {
         var $charts = $('#donut-charts');
-        chart_m = $charts.innerWidth() / 3/ 2 * 0.14;
-        chart_r = $charts.innerWidth() / 3 / 2 * 0.85;
+        chart_m = $charts.innerWidth() / 1.5/ 2 * 0.14;
+        chart_r = $charts.innerWidth() / 1.5 / 2 * 0.85;
 
         charts.append('svg')
             .attr('class', 'legend')
@@ -256,7 +256,6 @@ function DonutCharts() {
 
         createLegend(getCatNames(dataset));
         createCenter();
-
         updateDonut();
     }
 
@@ -273,8 +272,8 @@ function DonutCharts() {
  * Returns a json-like object.
  */
 function genData() {
-    var type = ['Total Tags', 'Total Files'];
-    var unit = ['M', 'GB', ''];
+    var type = ['Total Tags'];
+    var unit = ['M'];
     var cat = ['Google Drive', 'Dropbox', 'iCloud', 'OneDrive', 'Box'];
 
     var dataset = new Array();
