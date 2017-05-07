@@ -12,64 +12,83 @@
 {% endif %}
 
 <meta charset="utf-8">
-<div class="col-md-8">
-<div id="donut-charts">
-</div>
+<div class="col-md-6">
+  <div class="panel panel-info">
+    <div class="panel-body">
+      <h4>
+        <span class="glyphicon glyphicon glyphicon-stats" aria-hidden="true"></span>
+        &nbsp; Tag Stats
+      </h4>
+      <hr style="border-color:inherit"/>
+      <div id="donut-charts" style="text-align:center">
+      </div>
+    </div>
+  </div>
 </div>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src={% static "js/home.js" %} charset="utf-8"></script>
 
-<div class="col-md-4">
+<div class="col-md-6">
   <div class="panel panel-info">
     <div class="panel-body">
       
       <h4>
-        <span class="glyphicon glyphicon glyphicon-tags" aria-hidden="true"></span>
-        &nbsp; Notifications
+        <span class="glyphicon glyphicon glyphicon-th-list" aria-hidden="true"></span>
+        &nbsp; File Stats
       </h4>
-
       <hr style="border-color:inherit"/>
-
-      {% for n in new_files_list %}
-      <div>
-        <p> 
-            <a>New file {{n.file_name}}</a> 
-            <br>
-            <button id="{{n.file_name}}/" value="{{n.file_name}}/" name="auto_assign_file_path" onclick="autoassign(this.value)"> Auto Assign</button>
-            
-            <form action="/tag/assignTags" method="post">
-            {% csrf_token %}
-                <button id="{{n.file_name}}/" value="{{n.file_name}}/" name="file_path"> Manual Assign</button>
-            </form> 
-      </div>
-        
-      {% endfor %}
+      <ul id="file_list" class="list-group"></ul>
+      <ul class="pager">
+          <li class="previous"><a href="" onclick="prevPage('home'); return false;"> « </a></li>
+          <li class="next"><a href="" onclick="nextPage('home'); return false;"> » </a></li>
+      </ul>
     </div>
   </div>
 </div>
 
 <script type="text/javascript">
-  function autoassign(value){
-    console.log(value);
-    console.log(this.value);
-  var dct = {};dct = {'auto_assign_file_path': value};
+
+var csrftoken = '{{ csrf_token }}';
+
+// jquery extend function
+$.extend({
+    redirectPost: function(location, args)
+    {
+        var form = ''; 
+        $.each( args, function( key, value ) {
+            value = value.split('"').join('\"')
+            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+        });
+        $('<form action="' + location + '" method="POST">'+ form + '</form>').appendTo($(document.body)).submit();
+    }
+});
+
+$(document).ready(function(){
+    createFileList("#file_list", jQuery.parseJSON("{{ file_list| escapejs }}"), "home");
+});
+
+$('#file_list').on('click','.list-group-item #manual_assign',function(){
+    dct={};
+    dct['file_path'] = $(this).attr("name") + "/";
+    $.redirectPost("tag/assignTags/", dct);
+});
+
+$('#file_list').on('click','.list-group-item #auto_assign',function(){
+  dct={};
+  dct['auto_assign_file_path'] = $(this).attr("name") + "/";
   $.ajax({
          url: "/tag/autoAssign/",
          type: "POST",
          data: dct,
          async: 'true',
          success: function(data) {
-          alert(data);
-          location.href = "/"
+           location.href = "/";
          },
          error:function(data) {
-             console.log(data.responseText)
-             alert("error in getting from server")
+            console.log("Error:" + data.responsetext);
          },
-  });
-};
-  
+    });
+}); 
 </script>
-
 
 {% endblock %}

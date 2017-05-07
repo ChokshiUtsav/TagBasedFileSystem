@@ -21,6 +21,7 @@ import utility
 import eyed3
 from tag_dao import *
 import suggest_tags
+import json
 
 
 def findMostPopularTags():
@@ -29,7 +30,9 @@ def findMostPopularTags():
     return most_popular_tag_list[:6]
 
 def index(request):
-    return render(request,'index.html', {'new_files_list' : getListofUntaggedModifiedFiles()})
+    filtered_file_rows = getListofUntaggedModifiedFiles()
+    file_dict = [{"Id": i+1,"Title":ffr.file_name} for i, ffr in zip(range(len(filtered_file_rows)), filtered_file_rows)]
+    return render(request,'index.html', {'file_list':json.dumps(file_dict)})
 
 def findSuggestedTags(request):
     filename = request.session['complete_file_path']
